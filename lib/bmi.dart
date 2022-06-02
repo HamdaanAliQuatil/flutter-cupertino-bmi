@@ -12,6 +12,10 @@ class Bmi extends StatefulWidget {
 }
 
 class _BmiState extends State<Bmi> {
+  TextEditingController heightController = TextEditingController();
+  TextEditingController weightController = TextEditingController();
+  int unit = 0;
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -39,7 +43,9 @@ class _BmiState extends State<Bmi> {
                     ),
                   ),
                   Expanded(
-                    child: CupertinoTextField(),),
+                    child: CupertinoTextField(
+                      controller: heightController,
+                    ),),
                     Util.paddingLeft,
                 ],),
                 Util.paddingTop,
@@ -52,13 +58,17 @@ class _BmiState extends State<Bmi> {
                     ),
                   ),
                   Expanded(
-                    child: CupertinoTextField(),),
+                    child: CupertinoTextField(
+                      controller: weightController,
+                    ),),
                     Util.paddingLeft,
                 ],),
                 Expanded(child: Util.paddingTop),
               CupertinoButton.filled(
                 child: Text('Calculate BMI'), 
-                onPressed: (){},
+                onPressed: (){
+                  showResult();
+                },
               ),
               Util.paddingTop,
               ],
@@ -66,6 +76,33 @@ class _BmiState extends State<Bmi> {
           ),
         )
       ),
+    );
+  }
+
+  void showResult() async{
+    double height;
+    double weight;
+    int unit = await Util.getSettings();
+    height = double.tryParse(heightController.text) ?? 0;
+    weight = double.tryParse(weightController.text) ?? 0;
+
+    double result = Util.calculateBMI(height, weight, unit);
+    String message = 'Your BMI is ' + result.toStringAsFixed(2);
+    CupertinoAlertDialog dialog = CupertinoAlertDialog(
+      title: Text('Result'),
+      content: Text(message),
+      actions: <Widget>[
+        CupertinoDialogAction(
+          child: Text('OK'),
+          onPressed: (){
+            Navigator.pop(context);
+          },
+      )
+      ],
+    );
+    showDialog(
+      context: context, 
+      builder: (BuildContext context) {return dialog;}
     );
   }
 }
